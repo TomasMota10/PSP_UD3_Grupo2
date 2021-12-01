@@ -77,17 +77,31 @@ class Cliente(threading.Thread):
         # El último jugador (el que pone el contSem a 4), es el que reinicia las variables,
         # ordena el array de jugadores y muestra la clasificación general en el servidor.
         cad = ""
+        dicGen = {}
         jugadoresOrd = list()
         if (contSem == 4):
             jugadoresOrd = sorted(jugadores.items(), key=operator.itemgetter(1), reverse=True)
             if (os.path.isfile('./general.txt') == False):
                 myfile = Path('./general.txt')
                 myfile.touch(exist_ok=True)
-            general = open("./general.txt", "a")
+            general = open("./general.txt", "r")
+            for l in general:
+                p = l.split(";")
+                dicGen.__setitem__(p[0], p[1])
+            general.close()
+            listKeys = dicGen.keys()
             for jugador in enumerate(jugadoresOrd):
+                if (jugador[1][0] in listKeys):
+                    valor = int(dicGen[jugador[1][0]]) + int(jugadores[jugador[1][0]])
+                    dicGen[jugador[1][0]] = valor
+                else:
+                    dicGen.__setitem__(jugador[1][0], jugadores[jugador[1][0]])
                 stri = "{}".format(jugador[1][0]) + " - " + "{}".format(jugadores[jugador[1][0]]) + " puntos"
                 cad = cad + str(stri) + ";"
-                stri = "{}".format(jugador[1][0]) + ";" + "{}".format(jugadores[jugador[1][0]])
+            #dicGen = sorted(dicGen.items(), key= operator.itemgetter(1), reverse=True)
+            general = open("./general.txt", "w")
+            for k, v in dicGen.items():
+                stri = str(k) + ";" + str(v) + ";"
                 general.write(str(stri)+"\n")
             general.close()
             mostrarGeneral()
